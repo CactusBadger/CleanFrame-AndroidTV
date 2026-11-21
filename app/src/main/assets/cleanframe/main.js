@@ -433,6 +433,14 @@
     S.note = 'Undone: ' + u.label + '.';
     return true;
   }
+  function clearRecentlyRemoved() {
+    var before = snap();
+    if (!S.c.recent.length) return false;
+    if (!write(next(before.home.slice(), []), 'Clear recent')) return false;
+    S.undo.push({ label: 'Clear recent', snap: before });
+    S.note = 'Recently removed cleared.';
+    return true;
+  }
   function undoLabel() { var u = S.undo[S.undo.length - 1]; return u ? u.label : ''; }
   function undoCaption() { var label = undoLabel(); return label ? 'Undo ' + label.charAt(0).toLowerCase() + label.slice(1) : 'Nothing to undo'; }
   function editStatus(hint, move) {
@@ -722,6 +730,11 @@
     return { recent: rec, rest: ALPHA.filter(function (id) { return !onHome(id) && rec.indexOf(id) < 0; }) };
   }
   function otherList() { var o = otherGroups(); return o.recent.concat(o.rest); }
+  function editorHeadItems() {
+    var items = [['undo', 'Undo', S.undo.length ? '' : 'is-idle', 'undo'], ['done', 'Done', '', 'check']];
+    if (otherGroups().recent.length) items.push(['clear-recent', 'Clear recent', '', '']);
+    return items;
+  }
   function editorCut() { return 5; }
   function editorHomeY(i) { return i * ED_ROW + (i >= editorCut() ? 24 : 0); }
   function editorOtherY(j) {
@@ -752,11 +765,12 @@
       var f = t.f, nh = (t.lifted ? t.lifted.order : S.c.home).length, no = otherList().length;
       f.i = clamp(f.i, 0, Math.max(0, nh - 1));
       f.j = clamp(f.j, 0, Math.max(0, no - 1));
+      f.h = clamp(f.h, 0, editorHeadItems().length - 1);
       if (f.zone === 'home' && !nh) f.zone = no ? 'other' : 'head';
       if (f.zone === 'other' && !no) f.zone = nh ? 'home' : 'head';
     },
     key: function (t, k) {
-      var f = t.f, H = t.lifted ? t.lifted.order : S.c.home, O = otherList(), nh = H.length, no = O.length, d, tmp;
+      var f = t.f, H = t.lifted ? t.lifted.order : S.c.home, O = otherList(), heads = editorHeadItems(), nh = H.length, no = O.length, d, tmp;
       if (t.lifted) {
         d = k === 'up' ? -1 : k === 'down' ? 1 : 0;
         if (d && f.i + d >= 0 && f.i + d < nh) { tmp = H[f.i + d]; H[f.i + d] = H[f.i]; H[f.i] = tmp; f.i += d; S.err = null; }
@@ -767,9 +781,14 @@
       if (k === 'back') { closeEditor(t); return; }
       if (f.zone === 'head') {
         if (k === 'left' && f.h > 0) f.h--;
-        else if (k === 'right' && f.h < 1) f.h++;
+        else if (k === 'right' && f.h < heads.length - 1) f.h++;
         else if (k === 'down') { if (no) returnOther(t); else if (nh) f.zone = 'home'; }
-        else if (k === 'ok') { begin(); if (f.h === 0) undoLast(null); else closeEditor(t); }
+        else if (k === 'ok') {
+          begin();
+          if (heads[f.h][0] === 'undo') undoLast(null);
+          else if (heads[f.h][0] === 'clear-recent') clearRecentlyRemoved();
+          else closeEditor(t);
+        }
       } else if (f.zone === 'home') {
         if (k === 'up') { if (f.i > 0) f.i--; else f.zone = 'head'; }
         else if (k === 'down') { if (f.i < nh - 1) f.i++; }
@@ -1647,7 +1666,7 @@
       var entries = [], ys = [], y = 0, yf, minTop, maxTop = 0, rowEnd, before = false, afterRows = false;
       var hint = catalog.error ? catalog.error : catalog.loading ? 'Loading installed apps…' : f.zone === 'head' && f.h === 0 ? undoCaption() : f.zone === 'home' && f.part === 'remove' ? (H.length <= 1 ? LAST : app(H[f.i]).name + ' stays installed.') : '';
       setHTML(el.sub, editStatus(hint, t.lifted ? 'Moving ' + app(t.lifted.id).name + '. OK places it, Back puts it back.' : ''));
-      setHTML(el.head, headButtons([['undo', 'Undo', S.undo.length ? '' : 'is-idle', 'undo'], ['done', 'Done', '', 'check']], f.zone === 'head' ? f.h : -1, 'editor'));
+      setHTML(el.head, headButtons(editorHeadItems(), f.zone === 'head' ? f.h : -1, 'editor'));
       el.head.className = 's-head' + (f.zone === 'head' ? ' is-awake' : '');
       setHTML(el.lh, 'On Home <span class="s-count">' + S.c.home.length + ' of ' + CAP + '</span>');
       el['break'].className = 'ed-order-break' + (H.length > editorCut() ? ' is-on' : '');

@@ -63,6 +63,10 @@ Ported from [Nathan Clark's CleanFrame](https://github.com/nthnclrk/CleanFrame) 
   - Declared as `CATEGORY_LEANBACK_LAUNCHER` and `CATEGORY_HOME`.
   - Responsive remote D-Pad navigation (Up, Down, Left, Right, OK, Back) with subtle audio tick feedback.
 
+- **Apps on Home Editor**:
+  - Add or remove Home shortcuts without installing or uninstalling apps.
+  - Clear the Recently removed section independently from installed apps.
+
 ---
 
 ## Architecture
