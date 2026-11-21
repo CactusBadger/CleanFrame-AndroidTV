@@ -35,6 +35,10 @@ public class MainActivity extends Activity {
 
     private static final String TAG = "MainActivity";
     private WebView webView;
+    private static final String PREFS = "cleanframe";
+    private static final String NAV_VOLUME_KEY = "nav_volume_percent";
+    private static final int DEFAULT_NAV_VOLUME = 5;
+    private volatile float navVolume = DEFAULT_NAV_VOLUME / 100f;
     private SoundPool soundPool;
     private int soundNavTickId = 0;
     private boolean soundLoaded = false;
@@ -44,6 +48,7 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        navVolume = getSharedPreferences(PREFS, MODE_PRIVATE).getInt(NAV_VOLUME_KEY, DEFAULT_NAV_VOLUME) / 100f;
         initSoundPool();
         initWebView();
     }
@@ -72,8 +77,8 @@ public class MainActivity extends Activity {
     }
 
     private void playNavSound() {
-        if (soundPool != null && soundNavTickId != 0 && soundLoaded) {
-            soundPool.play(soundNavTickId, 0.85f, 0.85f, 1, 0, 1.0f);
+        if (soundPool != null && soundNavTickId != 0 && soundLoaded && navVolume > 0f) {
+            soundPool.play(soundNavTickId, navVolume, navVolume, 1, 0, 1.0f);
         }
     }
 
@@ -236,6 +241,20 @@ public class MainActivity extends Activity {
         @JavascriptInterface
         public int getScreenHeight() {
             return getResources().getDisplayMetrics().heightPixels;
+        }
+
+        @JavascriptInterface
+        public int getNavVolume() {
+            return Math.round(navVolume * 100f);
+        }
+
+        // Saves the navigation tick volume (0-100% of media volume) and plays it once as a preview.
+        @JavascriptInterface
+        public void setNavVolume(int percent) {
+            int clamped = Math.max(0, Math.min(100, percent));
+            navVolume = clamped / 100f;
+            getSharedPreferences(PREFS, MODE_PRIVATE).edit().putInt(NAV_VOLUME_KEY, clamped).apply();
+            runOnUiThread(MainActivity.this::playNavSound);
         }
 
         @JavascriptInterface

@@ -44,7 +44,7 @@
   var LOOK_KEYS = ['bg', 'layout', 'apps', 'font', 'controls', 'focus', 'material'];
   var LOOK_VALUES = { bg: ['dark', 'light', 'photo', 'bing'], layout: ['list', 'dock'], apps: ['icons', 'both', 'text'], font: Object.keys(FONTS).filter(function (id) { return id === 'manrope' || PRIVATE_FONTS.indexOf(id) >= 0; }), controls: ['icons', 'both', 'text'], focus: ['type', 'glass'], material: ['soft', 'frost', 'tint'] };
   var LOOK_NAMES = { bg: 'Background', layout: 'Layout', apps: 'Apps', font: 'Font', controls: 'Home controls', focus: 'Focus', material: 'Material' };
-  var VALUE_NAMES = { dark: 'Dark', light: 'Light', photo: 'Photo', bing: 'Random Bing photo', list: 'List', dock: 'Dock', type: 'Type', glass: 'Glass', soft: 'Soft', frost: 'Frost', tint: 'Clear tint', icons: 'Icons', both: 'Icons and text', text: 'Text' };
+  var VALUE_NAMES = { dark: 'Dark', light: 'Light', photo: 'Photo', bing: 'Random Bing photo', list: 'List', dock: 'Dock', type: 'Type', glass: 'Glass', soft: 'Soft', frost: 'Frost', tint: 'Clear tint', s0: 'Off', s2: '2%', s5: '5%', s10: '10%', s25: '25%', s50: '50%', icons: 'Icons', both: 'Icons and text', text: 'Text' };
   var UTIL = { wifi: ['Wi-Fi', 'wifi'], art: ['Art Mode', 'art'], apps: ['All apps', 'apps'], arrange: ['Arrange', 'arrange'], settings: ['Settings', 'settings'] };
   var MSG = {
     leave: { title: 'Leave Home?', line: 'Return to the Home screen?', note: '', actions: [['stay', 'Stay'], ['home', 'Home screen']] }
@@ -522,8 +522,8 @@
   function addAppsRoute() { openEditor('home'); }
   function openSettings() { push({ id: 'settings', f: { id: S.settingsFocus } }); }
   function openAppearance(group) {
-    var axis = { background: 'bg', layout: 'layout', typography: 'font', focus: 'focus' }[group];
-    var action = S.detailFocus[group] || (axis ? 'choice.' + axis + '.' + S.c[axis] : group === 'rotation' ? 'rotation.' + S.c.mode : 'device.home');
+    var axis = { background: 'bg', layout: 'layout', typography: 'font', focus: 'focus', sound: 'sound' }[group];
+    var action = S.detailFocus[group] || (axis ? 'choice.' + axis + '.' + axisValue(axis) : group === 'rotation' ? 'rotation.' + S.c.mode : 'device.home');
     push({ id: 'appearance', group: group, f: { action: action } });
   }
   function openMessage(key) { push({ id: 'message', msg: key, f: { b: 0 } }); }
@@ -849,8 +849,25 @@
       { id: 'typography', label: 'Typography', value: FONTS[S.c.font].name },
       { id: 'focus', label: 'Focus', value: VALUE_NAMES[S.c.focus] + (materialApplies() ? ', ' + VALUE_NAMES[S.c.material] : '') },
       { id: 'editor', label: 'Apps on Home', value: n + (n === 1 ? ' app' : ' apps') },
+      { id: 'sound', label: 'Sound', value: 'Navigation ' + VALUE_NAMES[navSound()] },
       { id: 'device', label: 'Device', value: 'Home and TV settings' }];
   }
+  var SOUND_LEVELS = [0, 2, 5, 10, 25, 50], navSoundLevel = null;
+  function navSound() {
+    if (navSoundLevel === null) {
+      var bridge = window.AndroidBridge, level = 5;
+      try { if (bridge && bridge.getNavVolume) level = bridge.getNavVolume(); } catch (error) { console.warn('Could not read navigation sound volume', error); }
+      navSoundLevel = SOUND_LEVELS.reduce(function (best, value) { return Math.abs(value - level) < Math.abs(best - level) ? value : best; }, 5);
+    }
+    return 's' + navSoundLevel;
+  }
+  function setNavSound(value) {
+    var level = parseInt(value.slice(1), 10);
+    navSoundLevel = level;
+    try { if (window.AndroidBridge && window.AndroidBridge.setNavVolume) window.AndroidBridge.setNavVolume(level); }
+    catch (error) { console.warn('Could not save navigation sound volume', error); }
+  }
+  function axisValue(axis) { return axis === 'sound' ? navSound() : S.c[axis]; }
   function settingsIds() { return settingsRows().map(function (r) { return r.id; }); }
   V.settings = {
     sheet: true,
@@ -869,7 +886,7 @@
     if (id === 'editor') openEditor('settings');
     else openAppearance(id);
   }
-  var DETAIL_NAMES = { background: 'Background', layout: 'Layout', typography: 'Typography', focus: 'Focus', rotation: 'Rotation', device: 'Device' };
+  var DETAIL_NAMES = { background: 'Background', layout: 'Layout', typography: 'Typography', focus: 'Focus', rotation: 'Rotation', sound: 'Sound', device: 'Device' };
   function choice(axis, value, disabled) {
     return { action: axis === 'mode' ? 'rotation.' + value : 'choice.' + axis + '.' + value, axis: axis, value: value, disabled: !!disabled,
       label: axis === 'font' ? FONTS[value].name : axis === 'mode' ? MODES.filter(function (m) { return m.id === value; })[0].name : value === 'both' ? 'Both' : VALUE_NAMES[value] };
@@ -895,6 +912,8 @@
     ];
     if (t.group === 'rotation') return [{ id: 'mode', title: '', items: options('mode', MODES.map(function (m) { return m.id; }), !rotate),
       reason: !rotate ? 'Choose Photo or Random Bing photo to use rotation.' : 'Timed changes run only while Home is visible.' }];
+    if (t.group === 'sound') return [{ id: 'sound', title: 'Navigation sound', items: options('sound', SOUND_LEVELS.map(function (level) { return 's' + level; })),
+      reason: 'Percent of the TV media volume. Choosing a level plays the sound once.' }];
     if (t.group === 'device') return [{ id: 'device', title: '', items: [
       { action: 'device.home', label: 'Home screen', description: 'Return to CleanFrame Home' },
       { action: 'device.settings', label: 'TV settings', description: 'Picture, sound and network settings' }
@@ -920,7 +939,7 @@
     t.f.action = item.action;
     if (item.action !== 'settings.back') S.detailFocus[t.group] = item.action;
     if (column !== undefined) t.f.column = column;
-    if (item.axis) S.appearanceFocus = item.axis;
+    if (item.axis && item.axis !== 'sound') S.appearanceFocus = item.axis;
   }
   function applyRotation(value) {
     var c;
@@ -940,6 +959,7 @@
       if (error && error.row === 'mode') applyRotation(error.patch.mode);
       else if (error) setLook(error.patch, { row: error.row });
     } else if (item.axis === 'mode') applyRotation(item.value);
+    else if (item.axis === 'sound') setNavSound(item.value);
     else if (item.axis) { patch[item.axis] = item.value; setLook(patch, { row: item.axis }); }
     else if (item.action === 'background.wallpaper') openWallpaper();
     else if (item.action === 'background.rotation') openAppearance('rotation');
@@ -949,10 +969,10 @@
   V.appearance = {
     norm: function (t) {
       var rows = detailRows(t), exists = false, applied = null;
-      var axis = { background: 'bg', layout: 'layout', typography: 'font', focus: 'focus', rotation: 'mode' }[t.group];
+      var axis = { background: 'bg', layout: 'layout', typography: 'font', focus: 'focus', rotation: 'mode', sound: 'sound' }[t.group];
       rows.forEach(function (items) { items.forEach(function (item) {
         if (item.action === t.f.action) exists = true;
-        if (item.axis === axis && item.value === S.c[axis]) applied = item;
+        if (item.axis === axis && item.value === axisValue(axis)) applied = item;
       }); });
       if (!exists) detailFocus(t, applied || (rows[1] || rows[0])[0], 0);
       if (t.f.column === undefined) t.f.column = detailLocation(t).column;
@@ -1631,7 +1651,7 @@
     appearanceTitle.textContent = DETAIL_NAMES[t.group];
     var at = detailLocation(t), selected = at.item, error = S.lookError, status = '', hint;
     function command(item, inner, cls) {
-      var applied = item.axis && S.c[item.axis] === item.value;
+      var applied = item.axis && axisValue(item.axis) === item.value;
       var loading = !!(item.axis && S.pending && S.pending.target[item.axis] === item.value && S.pending.row === item.axis);
       return '<button type="button" tabindex="-1" class="setting-choice' + (cls ? ' ' + cls : '') + (t.f.action === item.action ? ' is-focus' : '') + (item.disabled ? ' is-disabled' : '') + (applied ? ' is-applied' : '') + (loading ? ' is-loading' : '') + '"'
         + (item.axis ? ' role="radio" aria-checked="' + !!applied + '"' : '') + ' aria-label="' + esc(item.axis && item.value === 'both' ? 'Icons and text' : item.label) + '" aria-disabled="' + !!item.disabled + '" aria-busy="' + loading + '"'
