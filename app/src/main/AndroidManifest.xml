@@ -30,7 +30,7 @@
         android:hardwareAccelerated="true"
         android:banner="@mipmap/ic_launcher"
         android:icon="@mipmap/ic_launcher"
-        android:label="Apple TV Home"
+        android:label="CleanFrame"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.TV">
@@ -39,7 +39,7 @@
             android:name=".MainActivity"
             android:banner="@mipmap/ic_launcher"
             android:icon="@mipmap/ic_launcher"
-            android:label="Apple TV Home"
+            android:label="CleanFrame"
             android:launchMode="singleTask"
             android:clearTaskOnLaunch="true"
             android:stateNotNeeded="true"
