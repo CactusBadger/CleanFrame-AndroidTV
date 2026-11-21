@@ -157,7 +157,7 @@ public class MainActivity extends Activity {
         @JavascriptInterface
         public void openHdmi(String port) {
             runOnUiThread(() -> {
-                TvInputHelper.switchToInput(MainActivity.this, TvInputHelper.INPUT_HDMI1, "PlayStation 5");
+                TvInputHelper.switchToInput(MainActivity.this, TvInputHelper.INPUT_HDMI1, "HDMI 1");
             });
         }
 
@@ -259,8 +259,8 @@ public class MainActivity extends Activity {
 
     private void handleLaunch(String target) {
         Log.d(TAG, "handleLaunch triggered with target: " + target);
-        if ("input_hdmi1".equalsIgnoreCase(target) || "playstation".equalsIgnoreCase(target)) {
-            TvInputHelper.switchToInput(this, TvInputHelper.INPUT_HDMI1, "PlayStation 5");
+        if ("input_hdmi1".equalsIgnoreCase(target)) {
+            TvInputHelper.switchToInput(this, TvInputHelper.INPUT_HDMI1, "HDMI 1");
             return;
         }
 

@@ -51,9 +51,6 @@ Ported from [Nathan Clark's CleanFrame](https://github.com/nthnclrk/CleanFrame) 
   - Engineered with real physical display geometry and `devicePixelRatio` compensation.
   - Fits 720p TVs (such as Xiaomi Mi TV 32" `tvdpi`), 1080p, and 4K UHD displays to the exact millimeter with zero cropping.
 
-- **Live TV & HDMI 1 Switching (PlayStation 5)**:
-  - Integrates with Android's `TvInputManager` (`com.droidlogic.tvinput` / passthrough service) for one-click switching to your console or cable box.
-
 - **Smart Google Play Store Redirection**:
   - If a highlighted streaming app (Disney+, Prime Video, Stremio, Netflix, Spotify) is not yet installed, clicking its card directs straight to the official Google Play Store (`com.android.vending`) install page instead of showing an error.
   - Fixes regional package discrepancies (e.g., official global `com.disney.disneyplus`).
@@ -77,7 +74,6 @@ flowchart TD
     NativeHost -->|evaluateJavascript| Bridge[device.js / AndroidBridge]
     Bridge -->|State Machine & DOM| WebEngine[CleanFrame Web Engine]
     WebEngine -->|Click Uninstalled App| PlayStore[Google Play Store]
-    WebEngine -->|Select HDMI / PS5| TvInput[TvInputHelper / HDMI1]
     WebEngine -->|Select Art Mode| ArtMode[Full-Screen Art Screensaver]
 ```
 

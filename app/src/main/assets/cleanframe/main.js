@@ -16,7 +16,6 @@
   var PRIMARY_APPS = [
     { id: 'netflix', name: 'Netflix', mark: true, appId: 'com.netflix.ninja' },
     { id: 'youtube', name: 'YouTube', mark: true, appId: 'com.google.android.youtube.tv' },
-    { id: 'playstation', name: 'PlayStation 5', mark: true, appId: 'input_hdmi1' },
     { id: 'spotify', name: 'Spotify', mark: true, appId: 'com.spotify.tv.android' },
     { id: 'disneyplus', name: 'Disney+', mark: true, appId: 'com.disney.disneyplus' },
     { id: 'stremio', name: 'Stremio', mark: true, appId: 'com.stremio.one' },
@@ -330,7 +329,7 @@
     var s = saved && typeof saved === 'object' ? saved : {}, modern = s.look && typeof s.look === 'object' ? s.look : s;
     var legacyList = s.theme === 'list', h = [], recent = [], records = Array.isArray(s.appRecords) ? s.appRecords : [];
     records.slice(0, 256).forEach(function (a) {
-      if (!a || !safeId(a.id) || !safeId(a.appId) || typeof a.name !== 'string' || !a.name.trim() || app(a.id)) return;
+      if (!a || a.id === 'playstation' || a.appId === 'input_hdmi1' || !safeId(a.id) || !safeId(a.appId) || typeof a.name !== 'string' || !a.name.trim() || app(a.id)) return;
       APPS.push({ id: a.id, appId: a.appId, name: a.name.slice(0, 160), brand: ['hbomax', 'spotify', 'tubi'].indexOf(a.brand) >= 0 ? a.brand : '', mark: ['hbomax', 'spotify', 'tubi'].indexOf(a.brand) >= 0, icon: safeIcon(a.icon) });
     });
     (Array.isArray(s.home) ? s.home : Array.isArray(s.dock) ? s.dock : []).forEach(function (id) {
