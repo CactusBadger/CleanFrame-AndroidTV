@@ -40,20 +40,24 @@ Ported from [Nathan Clark's CleanFrame](https://github.com/nthnclrk/CleanFrame) 
   - Clicking it immediately launches the native Android TV *Network & Internet* list for fast Wi-Fi connection switching and configuration.
   - Automatically detects active network type (Wi-Fi vs Ethernet).
 
+- **Backgrounds and Photo Rotation**:
+  - Choose a bundled photo or **Random Bing photo** in **Settings → Background → Background type**. The Bing catalogue uses the [Bing UK weekly feed](https://raw.githubusercontent.com/zigou23/Bing-Daily-Wallpaper/refs/heads/main/bing/weekly/bing_en-GB.json) and is refreshed when its cached copy is more than a day old.
+  - Rotation can keep the current photo, choose one when CleanFrame starts, or change it every 5, 15, or 60 minutes while Home is visible. Opening or restarting Home preserves the current Bing photo. When a feed update brings a different newest photo, it is shown first; rotation then resumes random selection.
+  - Bing photos load separately from the catalogue. If a photo cannot be loaded, CleanFrame keeps the current photo or uses its bundled fallback.
+  - **Focus → Material** (Soft, Frost or Clear tint) works with Bing backgrounds by blurring the live photo. The Home dock also blurs the current Bing background.
+
 - **Full-Screen Art Mode Screensaver**:
-  - **Random Bing photo** in **Settings → Background → Background type** picks a photo from the [Bing UK weekly feed](https://raw.githubusercontent.com/zigou23/Bing-Daily-Wallpaper/refs/heads/main/bing/weekly/bing_en-GB.json). Under **Background → Rotation**, keep the current photo fixed, pick a new one when CleanFrame starts, or rotate after 5, 15, or 60 minutes of visible Home time. The TV caches the catalogue locally and downloads a fresh copy when the cached file is more than one day old. Opening or restarting Home keeps the current photo, even after it has left the weekly feed. Only a download whose newest photo differs from the cached file switches Home to that newest photo: with **Fixed** it becomes the kept photo, and with rotation it shows first before random selection continues. Photos load separately from Bing; if unavailable, CleanFrame keeps the current photo or shows its bundled fallback. **Focus → Material** (Soft, Frost or Clear tint) also works with Bing photos: the glass is blurred from the live photo rather than pre-rendered.
-  - With **Random Bing photo** selected, Art Mode shuffles the Bing catalogue on its existing 45-second timer. Left/right browse the shuffle, and captions credit the photos.
-  - The translucent Home dock blurs the current Bing background rather than using a built-in wallpaper texture.
+  - Hides the dock, status text, clock, and overlays for a full-screen artwork.
+  - With a Bing background, Art Mode shuffles Bing photos every 45 seconds and shows photo credits.
+  - Press **Left** or **Right** to browse artworks. Press any other key to return Home; the displayed photo becomes the background. The existing Rotation setting still applies.
+  - Starts automatically after 3 minutes of inactivity on Home.
+
+- **Navigation Sound**:
   - **Settings → Sound → Navigation sound** sets the remote-navigation tick to Off, 2%, 5% (default), 10%, 25% or 50% of the TV media volume. Choosing a level plays a preview and is remembered across restarts.
-  - Turns your TV into an authentic museum art piece on the wall.
-  - **Zero UI**: All docks, status text, clocks, and overlays vanish into 100% pure art canvas.
-  - **Interactive Remote Controls**: Press **Left** or **Right** on the TV remote to browse artworks. Press any other key to return Home and save the photo currently on screen as your background. Your existing Rotation setting still applies.
-  - **Auto-Slideshow**: Seamlessly cycles through high-resolution curated gallery photos every 45 seconds.
-  - **Auto-Idle Timer**: Automatically launches Art Mode screensaver after 3 minutes of inactivity on the Home screen.
 
 - **Universal Display Scaling (720p / 1080p / 4K)**:
   - Engineered with real physical display geometry and `devicePixelRatio` compensation.
-  - Fits 720p TVs (such as Xiaomi Mi TV 32" `tvdpi`), 1080p, and 4K UHD displays to the exact millimeter with zero cropping.
+  - Scales the interface for 720p, 1080p, and 4K displays.
 
 - **Smart Google Play Store Redirection**:
   - If a highlighted streaming app (Disney+, Prime Video, Stremio, Netflix, Spotify) is not yet installed, clicking its card directs straight to the official Google Play Store (`com.android.vending`) install page instead of showing an error.
@@ -65,11 +69,15 @@ Ported from [Nathan Clark's CleanFrame](https://github.com/nthnclrk/CleanFrame) 
 
 - **Native Android TV Leanback Integration**:
   - Declared as `CATEGORY_LEANBACK_LAUNCHER` and `CATEGORY_HOME`.
-  - Responsive remote D-Pad navigation (Up, Down, Left, Right, OK, Back) with subtle audio tick feedback.
+  - Supports remote D-pad navigation (Up, Down, Left, Right, OK, Back) and a configurable navigation sound.
+  - Pressing the remote's **Home** key returns to CleanFrame's Home screen from any CleanFrame view.
 
 - **Apps on Home Editor**:
   - Add or remove Home shortcuts without installing or uninstalling apps.
   - Clear the Recently removed section independently from installed apps.
+
+- **Settings**:
+  - Settings rows share the available vertical space and resize to keep the last option clear of the on-screen navigation hint.
 
 ---
 
