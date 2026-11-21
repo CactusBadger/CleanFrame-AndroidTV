@@ -331,11 +331,15 @@
     var legacyList = s.theme === 'list', h = [], recent = [], records = Array.isArray(s.appRecords) ? s.appRecords : [];
     records.slice(0, 256).forEach(function (a) {
       if (!a || a.id === 'playstation' || a.appId === 'input_hdmi1' || !safeId(a.id) || !safeId(a.appId) || typeof a.name !== 'string' || !a.name.trim() || app(a.id)) return;
-      APPS.push({ id: a.id, appId: a.appId, name: a.name.slice(0, 160), brand: ['hbomax', 'spotify', 'tubi'].indexOf(a.brand) >= 0 ? a.brand : '', mark: ['hbomax', 'spotify', 'tubi'].indexOf(a.brand) >= 0, icon: safeIcon(a.icon) });
+      var brand = ['hbomax', 'spotify', 'tubi'].indexOf(a.brand) >= 0 ? a.brand : FrameDevice.brandForAppId(a.appId);
+      APPS.push({ id: a.id, appId: a.appId, name: a.name.slice(0, 160), brand: brand, mark: !!brand, icon: safeIcon(a.icon) });
     });
     (Array.isArray(s.home) ? s.home : Array.isArray(s.dock) ? s.dock : []).forEach(function (id) {
       if (!safeId(id) || h.indexOf(id) >= 0 || h.length >= CAP) return;
-      if (!app(id) && id.indexOf('.') > 0) APPS.push({ id: id, appId: id, name: id.split('.').pop(), mark: false });
+      if (!app(id) && id.indexOf('.') > 0) {
+        var brand = FrameDevice.brandForAppId(id);
+        APPS.push({ id: id, appId: id, name: id.split('.').pop(), brand: brand, mark: !!brand });
+      }
       if (app(id)) h.push(id);
     });
     if (!h.length) h = PRIMARY.slice();

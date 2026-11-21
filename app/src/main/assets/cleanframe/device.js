@@ -8,7 +8,8 @@
     spotify: 'com.spotify.tv.android',
     disneyplus: 'com.disney.disneyplus',
     stremio: 'com.stremio.one',
-    primevideo: 'com.amazon.amazonvideo.livingroom'
+    primevideo: 'com.amazon.amazonvideo.livingroom',
+    plex: 'com.plexapp.android'
   };
 
   var PKG_TO_BRAND = {
@@ -17,7 +18,8 @@
     'com.spotify.tv.android': 'spotify',
     'com.disney.disneyplus': 'disneyplus',
     'com.stremio.one': 'stremio',
-    'com.amazon.amazonvideo.livingroom': 'primevideo'
+    'com.amazon.amazonvideo.livingroom': 'primevideo',
+    'com.plexapp.android': 'plex'
   };
 
   function hasBridge() {
@@ -101,6 +103,10 @@
     return 'wifi';
   }
 
+  function brandForAppId(packageName) {
+    return PKG_TO_BRAND[packageName] || '';
+  }
+
   function apps(done) {
     if (!done) done = function () {};
     if (!hasBridge() || !window.AndroidBridge.getInstalledAppsJson) {
@@ -153,6 +159,7 @@
     settings: settings,
     network: network,
     getNetworkType: getNetworkType,
+    brandForAppId: brandForAppId,
     apps: apps
   };
 }());
