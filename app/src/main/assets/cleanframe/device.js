@@ -9,7 +9,10 @@
     disneyplus: 'com.disney.disneyplus',
     stremio: 'com.stremio.one',
     primevideo: 'com.amazon.amazonvideo.livingroom',
-    plex: 'com.plexapp.android'
+    plex: 'com.plexapp.android',
+    googleplay: 'com.android.vending',
+    airplayvideo: 'com.ecloud.eairplay',
+    bluetooth: 'com.inspur.BlueToothController'
   };
 
   var PKG_TO_BRAND = {
@@ -19,7 +22,10 @@
     'com.disney.disneyplus': 'disneyplus',
     'com.stremio.one': 'stremio',
     'com.amazon.amazonvideo.livingroom': 'primevideo',
-    'com.plexapp.android': 'plex'
+    'com.plexapp.android': 'plex',
+    'com.android.vending': 'googleplay',
+    'com.ecloud.eairplay': 'airplayvideo',
+    'com.inspur.BlueToothController': 'bluetooth'
   };
 
   function hasBridge() {
