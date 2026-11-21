@@ -1,7 +1,7 @@
 # CleanFrame for Android TV & Google TV
 
 <p align="center">
-  <b>A quiet, distraction-free home launcher inspired by Samsung The Frame — with Art Mode screensaver, remote D-Pad navigation, and DPR auto-scaling for Android TV.</b>
+  <b>A quiet, distraction-free home launcher with an art-focused screensaver, remote D-Pad navigation, and DPR auto-scaling for Android TV.</b>
 </p>
 
 <p align="center">
