@@ -25,6 +25,12 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000}
 .home{position:absolute;left:0;top:0;width:1920px;height:1080px}
 .bg{position:absolute;left:0;top:0;width:1920px;height:1080px}
 .photo{position:absolute;left:0;top:0;width:1920px;height:1080px;max-width:none;object-fit:cover;object-position:50% 50%}
+.bing-photos{display:none;position:absolute;inset:0}
+.bg-bing #bingHome,.bg-bing.at-artmode #bingArt{display:block}
+.bg-bing #bingHome{background:#1d2a30 url("assets/wallpapers/misty.jpg") center/cover no-repeat}
+.bg-bing .shade{background:linear-gradient(to bottom,rgba(4,10,12,.60),rgba(4,10,12,0))}
+.bg-bing .art-caption{max-width:1680px;padding:12px 20px;border-radius:12px;background:rgba(0,0,0,.72)}
+.bg-bing .art-subtitle{color:#fff}
 .scrim{position:absolute;left:0;top:560px;width:1920px;height:520px;background:linear-gradient(to bottom,rgba(4,10,12,0),rgba(4,10,12,.42) 70%,rgba(4,10,12,.52))}
 .shade{position:absolute;left:0;top:0;width:1920px;height:300px;background:linear-gradient(to bottom,rgba(4,10,12,.32),rgba(4,10,12,.14) 150px,rgba(4,10,12,0))}
 .tone-light .shade{background:linear-gradient(to bottom,rgba(4,10,12,.42),rgba(4,10,12,.2) 160px,rgba(4,10,12,0))}
@@ -129,6 +135,8 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000}
 .mat-scrim{position:absolute;left:0;top:0;width:1920px;height:520px;background:linear-gradient(to bottom,rgba(4,10,12,0),rgba(4,10,12,.42) 70%,rgba(4,10,12,.52))}
 .mat-veil{position:absolute;left:0;top:0;right:0;bottom:0;background:rgba(8,14,18,.16)}
 .tone-light .mat-veil{background:rgba(8,14,18,.27)}
+.bg-bing .mat-img,.bg-bing .mat-scrim{display:none}
+.bg-bing .mat{backdrop-filter:blur(16px)}
 .registered-material .mat-scrim,.registered-material .mat-veil{display:none}
 .m-frost .mat-scrim{display:none}
 .m-frost .mat-veil{background:rgba(12,10,8,var(--fv,.12))}
@@ -549,12 +557,14 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000}
 .setting-choice.is-disabled .setting-swatch{opacity:.5}
 .swatch-light{background:#f2efe8;box-shadow:inset 0 0 0 1px rgba(29,26,22,.12)}
 .swatch-dark{background:#0d0d0d;box-shadow:inset 0 0 0 1px rgba(246,241,231,.15)}
+.swatch-bing{background:linear-gradient(140deg,#276a7b,#805a8b)}
 .setting-reason{margin-top:16px;font-size:26px;line-height:36px;color:var(--mute)}
 .is-horizontal .setting-options{flex-direction:row;gap:12px}
 .is-horizontal .setting-choice{flex:1;min-width:0;min-height:92px;padding:12px 20px;gap:16px;font-size:36px}
 .is-horizontal .setting-tick{width:26px;margin-left:0}
 .is-horizontal .setting-tick .ico{width:26px;height:26px}
 .section-material .setting-choice:last-child{flex:1.4}
+.detail-background .section-bg .setting-choice{min-height:68px;padding-top:9px;padding-bottom:9px}
 .detail-background .section-rotation .setting-choice{padding-left:128px}
 .detail-layout .setting-section+.setting-section,.detail-focus .setting-section+.setting-section{margin-top:64px}
 .detail-typography .setting-choice,.detail-rotation .setting-choice{min-height:88px}

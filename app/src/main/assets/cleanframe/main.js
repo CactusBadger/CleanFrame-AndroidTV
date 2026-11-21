@@ -42,9 +42,9 @@
   };
   var PRIVATE_FONTS = window.CleanFramePrivateFontIDs || [], fontMetrics = {}, unavailableFonts = {}, widthCache = {}, fontsReady = false;
   var LOOK_KEYS = ['bg', 'layout', 'apps', 'font', 'controls', 'focus', 'material'];
-  var LOOK_VALUES = { bg: ['dark', 'light', 'photo'], layout: ['list', 'dock'], apps: ['icons', 'both', 'text'], font: Object.keys(FONTS).filter(function (id) { return id === 'manrope' || PRIVATE_FONTS.indexOf(id) >= 0; }), controls: ['icons', 'both', 'text'], focus: ['type', 'glass'], material: ['soft', 'frost', 'tint'] };
+  var LOOK_VALUES = { bg: ['dark', 'light', 'photo', 'bing'], layout: ['list', 'dock'], apps: ['icons', 'both', 'text'], font: Object.keys(FONTS).filter(function (id) { return id === 'manrope' || PRIVATE_FONTS.indexOf(id) >= 0; }), controls: ['icons', 'both', 'text'], focus: ['type', 'glass'], material: ['soft', 'frost', 'tint'] };
   var LOOK_NAMES = { bg: 'Background', layout: 'Layout', apps: 'Apps', font: 'Font', controls: 'Home controls', focus: 'Focus', material: 'Material' };
-  var VALUE_NAMES = { dark: 'Dark', light: 'Light', photo: 'Photo', list: 'List', dock: 'Dock', type: 'Type', glass: 'Glass', soft: 'Soft', frost: 'Frost', tint: 'Clear tint', icons: 'Icons', both: 'Icons and text', text: 'Text' };
+  var VALUE_NAMES = { dark: 'Dark', light: 'Light', photo: 'Photo', bing: 'Random Bing photo', list: 'List', dock: 'Dock', type: 'Type', glass: 'Glass', soft: 'Soft', frost: 'Frost', tint: 'Clear tint', icons: 'Icons', both: 'Icons and text', text: 'Text' };
   var UTIL = { wifi: ['Wi-Fi', 'wifi'], art: ['Art Mode', 'art'], apps: ['All apps', 'apps'], arrange: ['Arrange', 'arrange'], settings: ['Settings', 'settings'] };
   var MSG = {
     leave: { title: 'Leave Home?', line: 'Return to the Home screen?', note: '', actions: [['stay', 'Stay'], ['home', 'Home screen']] }
@@ -86,6 +86,7 @@
     return fallback;
   }
   function lookOf(c) { return { bg: c.bg, wall: c.wall, layout: c.layout, apps: c.apps, font: c.font, controls: c.controls, focus: c.focus, material: c.material }; }
+  function canRotate(bg) { return bg === 'photo' || bg === 'bing'; }
   function materialApplies(c) { c = c || S.c; return c.bg === 'photo' && (c.layout === 'dock' || c.focus === 'glass'); }
   function derivedTheme() { return S.c.layout === 'list' ? 'list' : 'shore'; }
 
@@ -365,7 +366,7 @@
     initial.controls = 'icons'; initial.apps = 'both';
     S.stack = [{ id: 'home', f: { zone: 'apps', u: 0 } }];
     S.sel = S.c.lastApp; S.selIdx = S.c.home.indexOf(S.sel);
-    if (saved && initial.mode === 'open') initial.wall = WALLS[(wallIndex(initial.wall) + 1) % WALLS.length].id;
+    if (saved && initial.bg !== 'bing' && initial.mode === 'open') initial.wall = WALLS[(wallIndex(initial.wall) + 1) % WALLS.length].id;
     // Keep the old schema keys alongside the builder values for in-place updates.
     try { localStorage.setItem(KEY, JSON.stringify(serialise(initial))); S.c = initial; storageOk = true; } catch (e) { storageOk = false; }
   }
@@ -874,12 +875,12 @@
       label: axis === 'font' ? FONTS[value].name : axis === 'mode' ? MODES.filter(function (m) { return m.id === value; })[0].name : value === 'both' ? 'Both' : VALUE_NAMES[value] };
   }
   function detailSections(t) {
-    var flat = S.c.bg !== 'photo', inactive = !materialApplies();
+    var flat = S.c.bg !== 'photo', rotate = canRotate(S.c.bg), inactive = !materialApplies();
     function options(axis, values, disabled) { return values.map(function (value) { return choice(axis, value, disabled); }); }
     if (t.group === 'background') return [
-      { id: 'bg', title: 'Background type', items: options('bg', ['photo', 'light', 'dark']) },
-      { id: 'wall', title: 'Wallpaper', items: [{ action: 'background.wallpaper', label: wall(S.c.wall).name, thumbnail: true, disabled: flat }] },
-      { id: 'rotation', title: 'Rotation', items: [{ action: 'background.rotation', label: mode().name, disabled: flat }], reason: flat ? 'Choose Photo to use wallpaper and rotation.' : '' }
+      { id: 'bg', title: 'Background type', items: options('bg', ['photo', 'bing', 'light', 'dark']) },
+      { id: 'wall', title: 'Wallpaper', items: [{ action: 'background.wallpaper', label: wall(S.c.wall).name, thumbnail: true, disabled: S.c.bg !== 'photo' }] },
+      { id: 'rotation', title: 'Rotation', items: [{ action: 'background.rotation', label: mode().name, disabled: !rotate }], reason: !rotate ? 'Choose Photo or Random Bing photo to use rotation.' : '' }
     ];
     if (t.group === 'layout') return [
       { id: 'layout', title: 'Layout', horizontal: true, items: options('layout', ['list', 'dock']) },
@@ -892,8 +893,8 @@
       { id: 'material', title: 'Material', horizontal: true, items: options('material', ['soft', 'frost', 'tint'], inactive),
         reason: inactive ? flat ? 'Materials are available with a Photo background.' : 'Choose Glass focus or the Dock layout to use materials.' : '' }
     ];
-    if (t.group === 'rotation') return [{ id: 'mode', title: '', items: options('mode', MODES.map(function (m) { return m.id; }), flat),
-      reason: flat ? 'Choose Photo in Background to use rotation.' : 'Timed changes pause while Settings or another panel is open.' }];
+    if (t.group === 'rotation') return [{ id: 'mode', title: '', items: options('mode', MODES.map(function (m) { return m.id; }), !rotate),
+      reason: !rotate ? 'Choose Photo or Random Bing photo to use rotation.' : 'Timed changes run only while Home is visible.' }];
     if (t.group === 'device') return [{ id: 'device', title: '', items: [
       { action: 'device.home', label: 'Home screen', description: 'Return to CleanFrame Home' },
       { action: 'device.settings', label: 'TV settings', description: 'Picture, sound and network settings' }
@@ -923,7 +924,7 @@
   }
   function applyRotation(value) {
     var c;
-    if (S.c.bg !== 'photo') return;
+    if (!canRotate(S.c.bg)) return;
     S.err = null; S.lookError = null;
     if (value === S.c.mode) return;
     c = next(S.c.home.slice(), S.c.recent.slice()); c.mode = value;
@@ -992,13 +993,97 @@
 
   /* ---------- Art Mode (Full Screen Screensaver) ---------- */
   var artSlideTimer = null, artCaptionTimer = null, artIndex = 0, idleTimer = null;
+  var bingHome = null, bingHomeToken = 0, bingHomeKey = 'cleanframe.bing-home.v1';
+
+  function loadBingImage(entry, done) {
+    var image = document.createElement('img');
+    image.className = 'photo';
+    image.alt = '';
+    image.referrerPolicy = 'no-referrer';
+    image.src = entry.url;
+    whenReady(image, function (ok) { done(ok ? image : null); });
+  }
+
+  function setBingHome(entry, image) {
+    $('bingHome').replaceChildren(image);
+    bingHome = entry;
+    try { localStorage.setItem(bingHomeKey, JSON.stringify({ url: entry.url, copyright: entry.copyright || '' })); }
+    catch (error) { console.warn('Could not save Bing Home wallpaper preference', error); }
+  }
+
+  function chooseBingHome(keepSaved, timedMode) {
+    var token = ++bingHomeToken, kept = bingHome, previous;
+    if (!kept) {
+      try {
+        var raw = localStorage.getItem(bingHomeKey), parsed = raw && raw.charAt(0) === '{' ? JSON.parse(raw) : { url: raw };
+        if (parsed && typeof parsed.url === 'string' && parsed.url.indexOf('https://www.bing.com/th?id=OHR.') === 0)
+          kept = { url: parsed.url, copyright: typeof parsed.copyright === 'string' ? parsed.copyright.slice(0, 300) : '' };
+      } catch (error) { console.warn('Could not read Bing Home wallpaper preference', error); }
+    }
+    previous = kept && kept.url;
+    function current() {
+      return S.c.bg === 'bing' && token === bingHomeToken &&
+        (!timedMode || (S.c.mode === timedMode && rotationActive()));
+    }
+    window.CleanFrameBing.get().then(function (list) {
+      var fresh = window.CleanFrameBing.fresh();
+      var choices = window.CleanFrameBing.shuffled(list.filter(function (entry) { return entry.url !== previous; }));
+      // The kept photo may have left the weekly feed, so it is restored from its own saved record.
+      var saved = list.find(function (entry) { return entry.url === previous; }) || kept;
+      if (fresh) {
+        window.CleanFrameBing.shown(fresh.url);
+        choices = [fresh].concat(choices.filter(function (entry) { return entry !== fresh; }));
+      } else if (saved && (keepSaved || !choices.length && !bingHome)) choices.unshift(saved);
+      function attempt(index) {
+        if (!current() || index >= choices.length || index >= 3) return;
+        loadBingImage(choices[index], function (image) {
+          if (!current()) return;
+          if (!image) { console.warn('Could not load Bing Home wallpaper'); attempt(index + 1); return; }
+          setBingHome(choices[index], image);
+          var t = top();
+          if (t.id === 'artmode' && !$('bingArt').firstChild) {
+            t.bingShown = bingHome;
+            showArtCaption();
+          }
+        });
+      }
+      attempt(0);
+    });
+  }
+
+  // A download with a newer photo shows it on Home straight away, then any rotation continues from there.
+  var freshBingToken = -1;
+  function showFreshBing() {
+    if (S.c.bg !== 'bing' || top().id !== 'home' || document.hidden || S.pending ||
+        freshBingToken === bingHomeToken || !window.CleanFrameBing.fresh()) return;
+    chooseBingHome(false);
+    freshBingToken = bingHomeToken;
+    resetRotation(); syncRotation();
+  }
+  window.CleanFrameBing.onFresh(showFreshBing);
+  setInterval(function () { if (S.c.bg === 'bing' && !document.hidden) window.CleanFrameBing.get(); }, 60 * 60 * 1000);
+
+  function advanceBingArt(t, delta) {
+    if (!t.bingOrder || !t.bingOrder.length) return;
+    var order = t.bingOrder;
+    t.bingIndex = (t.bingIndex + delta + order.length) % order.length;
+    var entry = order[t.bingIndex], request = ++t.bingRequest;
+    loadBingImage(entry, function (image) {
+      if (top() !== t || request !== t.bingRequest) return;
+      if (!image) { console.warn('Could not load Bing Art Mode wallpaper'); return; }
+      $('bingArt').replaceChildren(image);
+      t.bingShown = entry;
+      showArtCaption();
+    });
+  }
 
   function showArtCaption() {
-    var el = $('artCaption');
+    var el = $('artCaption'), t = top();
     if (!el) return;
-    var w = WALLS[artIndex % WALLS.length];
-    if ($('artTitle')) $('artTitle').textContent = w.name || 'Fine Art';
-    if ($('artSubtitle')) $('artSubtitle').textContent = 'The Frame Art Gallery · ◄ ► Ganti · Tekan sembarang tombol untuk kembali';
+    var w = wall(t.artWall), bing = S.c.bg === 'bing';
+    if ($('artTitle')) $('artTitle').textContent = bing ? (t.bingShown ? 'Bing Wallpaper' : WALLS[0].name) : (w ? w.name : 'Fine Art');
+    if ($('artSubtitle')) $('artSubtitle').textContent = (bing && t.bingShown && t.bingShown.copyright ? t.bingShown.copyright + ' · ' : '') +
+      '◄ ► Change photo · Any other button to keep this photo and return';
     el.classList.add('show');
     clearTimeout(artCaptionTimer);
     artCaptionTimer = setTimeout(function () {
@@ -1007,10 +1092,20 @@
   }
 
   function advanceArt(delta) {
+    if (S.c.bg === 'bing') { advanceBingArt(top(), delta); return; }
     artIndex = (artIndex + delta + WALLS.length) % WALLS.length;
-    var w = WALLS[artIndex];
-    showWall(w.id, function () {});
-    showArtCaption();
+    showArtWall(top(), WALLS[artIndex].id);
+  }
+
+  function showArtWall(t, id) {
+    showWall(id, function (ok) {
+      if (top() !== t) return;
+      if (!ok) { console.warn('Could not load Art Mode wallpaper: ' + id); return; }
+      t.artWall = id;
+      t.artBundle = S.previewBundle;
+      render();
+      showArtCaption();
+    });
   }
 
   function startArtSlideshow() {
@@ -1038,18 +1133,49 @@
     for (var i = 0; i < WALLS.length; i++) {
       if (WALLS[i].id === curr) { artIndex = i; break; }
     }
-    push({ id: 'artmode', f: {} });
+    var t = { id: 'artmode', f: {}, bingShown: bingHome, bingRequest: 0,
+      artWall: S.c.bg === 'photo' && IMG.photo.naturalWidth ? curr : null };
+    push(t);
+    if (S.c.bg === 'bing') {
+      window.CleanFrameBing.get().then(function (list) {
+        if (top() !== t) return;
+        t.bingOrder = window.CleanFrameBing.shuffled(list.filter(function (entry) { return !t.bingShown || entry.url !== t.bingShown.url; }));
+        t.bingIndex = -1;
+        if (t.bingShown) { t.bingOrder.unshift(t.bingShown); t.bingIndex = 0; }
+        else advanceBingArt(t, 1);
+      });
+    } else if (!t.artWall) showArtWall(t, WALLS[artIndex].id);
     render();
     showArtCaption();
     startArtSlideshow();
+    syncRotation();
   }
 
   function exitArtMode() {
+    var t = top(), art = $('bingArt'), image = art.firstChild, el = $('artCaption'), c;
+    if (t.id !== 'artmode') return;
     stopArtSlideshow();
-    var el = $('artCaption');
+    clearTimeout(artCaptionTimer);
     if (el) el.classList.remove('show');
     pop();
+    if (S.c.bg === 'bing') {
+      if (image && t.bingShown && (!bingHome || bingHome.url !== t.bingShown.url)) {
+        ++bingHomeToken;
+        setBingHome(t.bingShown, image);
+        resetRotation();
+      }
+      art.replaceChildren();
+    } else if (t.artBundle && (S.c.bg !== 'photo' || t.artWall !== S.c.wall)) {
+      c = next(S.c.home.slice(), S.c.recent.slice());
+      c.bg = 'photo'; c.wall = t.artWall;
+      if (write(c, 'Wallpaper ' + wall(c.wall).name)) {
+        cancelLook();
+        installBundle(t.artBundle, c);
+        committedBundle = t.artBundle; S.previewBundle = null;
+      } else restoreLook();
+    } else restoreLook();
     render();
+    syncRotation();
     resetIdleTimer();
   }
 
@@ -1519,7 +1645,7 @@
         + '<div class="setting-options"' + (section.items[0].axis ? ' role="radiogroup" aria-label="' + esc(section.title || LOOK_NAMES[section.id] || DETAIL_NAMES[t.group]) + '"' : '') + '>'
         + section.items.map(function (item) {
           var swatch = item.axis === 'bg', body = '';
-          if (swatch || item.thumbnail) body += item.value === 'light' || item.value === 'dark'
+          if (swatch || item.thumbnail) body += item.value === 'light' || item.value === 'dark' || item.value === 'bing'
             ? '<span class="setting-swatch swatch-' + item.value + '" aria-hidden="true"></span>'
             : '<img class="setting-swatch" src="' + WP + S.c.wall + '-thumb.jpg" alt="">';
           body += '<span class="setting-copy"><span class="setting-name">' + esc(item.label) + '</span>'
@@ -1798,6 +1924,7 @@
       if (reflow) { S.reflow = true; frame = ++reflowToken; }
       if (fontChanged) { S.fontSwitch = true; fontFrame = ++fontSwitchToken; }
       installBundle(bundle, target);
+      if (target.bg === 'bing' && (opts.startup || changes.bg === 'bing')) chooseBingHome(opts.startup && S.c.mode !== 'open');
       if (bundle) committedBundle = bundle;
       S.lookError = null; S.previewBundle = null;
       render(); syncRotation();
@@ -1861,21 +1988,26 @@
 
   /* ---------- Lifecycle and remote input ---------- */
   var clockTimer = 0, rotationTimer = 0, activeSince = 0, activeMs = 0, rotationKey = '';
-  function rotationActive() { return !document.hidden && top().id === 'home' && S.c.bg === 'photo' && !S.pending && mode().min > 0; }
+  function rotationActive() { return !document.hidden && top().id === 'home' && canRotate(S.c.bg) && !S.pending && mode().min > 0; }
   function pauseRotation() {
     if (activeSince) { activeMs += Date.now() - activeSince; activeSince = 0; }
     clearTimeout(rotationTimer); rotationTimer = 0;
   }
   function resetRotation() { pauseRotation(); activeMs = 0; rotationKey = ''; }
   function syncRotation() {
-    var key = S.c.wall + '|' + S.c.mode;
+    if (S.c.bg === 'bing' && !document.hidden) { window.CleanFrameBing.get(); showFreshBing(); }
+    var key = S.c.bg + '|' + (S.c.bg === 'photo' ? S.c.wall : '') + '|' + S.c.mode;
     pauseRotation();
     if (key !== rotationKey) { activeMs = 0; rotationKey = key; }
     if (!rotationActive()) return;
     activeSince = Date.now();
     rotationTimer = setTimeout(function () {
       pauseRotation(); activeMs = 0;
-      if (rotationActive()) setLook({ wall: WALLS[(wallIndex(S.c.wall) + 1) % WALLS.length].id }, { row: 'bg' });
+      if (!rotationActive()) return;
+      if (S.c.bg === 'bing') {
+        chooseBingHome(false, S.c.mode);
+        syncRotation();
+      } else setLook({ wall: WALLS[(wallIndex(S.c.wall) + 1) % WALLS.length].id }, { row: 'bg' });
     }, Math.max(10, mode().min * QA.minuteMs - activeMs));
   }
   function updateClock() {

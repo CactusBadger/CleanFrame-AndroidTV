@@ -41,9 +41,12 @@ Ported from [Nathan Clark's CleanFrame](https://github.com/nthnclrk/CleanFrame) 
   - Automatically detects active network type (Wi-Fi vs Ethernet).
 
 - **Full-Screen Art Mode Screensaver**:
+  - **Random Bing photo** in **Settings → Background → Background type** picks a photo from the [Bing UK weekly feed](https://raw.githubusercontent.com/zigou23/Bing-Daily-Wallpaper/refs/heads/main/bing/weekly/bing_en-GB.json). Under **Background → Rotation**, keep the current photo fixed, pick a new one when CleanFrame starts, or rotate after 5, 15, or 60 minutes of visible Home time. The TV caches the catalogue locally and downloads a fresh copy when the cached file is more than one day old. Opening or restarting Home keeps the current photo, even after it has left the weekly feed. Only a download whose newest photo differs from the cached file switches Home to that newest photo: with **Fixed** it becomes the kept photo, and with rotation it shows first before random selection continues. Photos load separately from Bing; if unavailable, CleanFrame keeps the current photo or shows its bundled fallback.
+  - With **Random Bing photo** selected, Art Mode shuffles the Bing catalogue on its existing 45-second timer. Left/right browse the shuffle, and captions credit the photos.
+  - The translucent Home dock blurs the current Bing background rather than using a built-in wallpaper texture.
   - Turns your TV into an authentic museum art piece on the wall.
   - **Zero UI**: All docks, status text, clocks, and overlays vanish into 100% pure art canvas.
-  - **Interactive Remote Controls**: Press **Left** or **Right** on the TV remote to browse artworks; press any key to wake back up to the Home screen.
+  - **Interactive Remote Controls**: Press **Left** or **Right** on the TV remote to browse artworks. Press any other key to return Home and save the photo currently on screen as your background. Your existing Rotation setting still applies.
   - **Auto-Slideshow**: Seamlessly cycles through high-resolution curated gallery photos every 45 seconds.
   - **Auto-Idle Timer**: Automatically launches Art Mode screensaver after 3 minutes of inactivity on the Home screen.
 
