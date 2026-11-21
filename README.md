@@ -85,15 +85,17 @@ Ported from [Nathan Clark's CleanFrame](https://github.com/nthnclrk/CleanFrame) 
 
 ```mermaid
 flowchart TD
-    Remote[TV Remote Control D-Pad] -->|dispatchKeyEvent| NativeHost[MainActivity.java]
-    NativeHost -->|Audio Effects| SoundPool[Navigation Sound Tick]
-    NativeHost -->|evaluateJavascript| Bridge[device.js / AndroidBridge]
-    Bridge -->|State Machine & DOM| WebEngine[CleanFrame Web Engine]
-    WebEngine -->|Click Uninstalled App| PlayStore[Google Play Store]
-    WebEngine -->|Select Art Mode| ArtMode[Full-Screen Art Screensaver]
+    Remote[TV Remote] -->|Key events| NativeHost[MainActivity.java]
+    NativeHost -->|playNavSound| SoundPool[Navigation Sound]
+    NativeHost -->|evaluateJavascript: key / Home| WebEngine[CleanFrame UI and State Machine]
+    WebEngine -->|FrameDevice calls| DeviceJS[device.js]
+    DeviceJS -->|AndroidBridge calls| NativeHost
+    NativeHost -->|Launch apps / open system settings| AndroidTV[Android TV]
+    WebEngine -->|Enter Art Mode| ArtMode[Full-Screen Art Screensaver]
 ```
 
 ### Bridge Methods (`AndroidBridge`)
+
 - `launch(packageName)`: Resolves package and launches Leanback / standard intent, or redirects to Play Store.
 - `openHdmi(port)`: Switches TV input to HDMI 1 via Android TV Input Framework.
 - `openSettings()`: Opens native Android TV system settings.
