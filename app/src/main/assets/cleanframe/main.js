@@ -2159,6 +2159,17 @@
     }
   };
 
+  /* The remote's Home key closes Art Mode, Settings, editors and dialogs, returning to Home. */
+  window.handleAndroidHome = function () {
+    try {
+      if (top().id === 'artmode') exitArtMode();
+      goScene('home');
+      resetIdleTimer();
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
   /* ---------- Start ---------- */
   cueL.innerHTML = icon('left'); cueR.innerHTML = icon('right');
   initialise();

@@ -415,6 +415,16 @@ public class MainActivity extends Activity {
         }
     }
 
+    // As the default launcher (singleTask), the remote's Home key arrives as a new HOME intent.
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
+        if (webView != null && intent != null && intent.hasCategory(Intent.CATEGORY_HOME)) {
+            webView.post(() -> webView.evaluateJavascript("if (window.handleAndroidHome) { window.handleAndroidHome(); }", null));
+        }
+    }
+
     @Override
     protected void onResume() {
         super.onResume();
