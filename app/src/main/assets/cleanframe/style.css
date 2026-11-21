@@ -137,6 +137,12 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000}
 .tone-light .mat-veil{background:rgba(8,14,18,.27)}
 .bg-bing .mat-img,.bg-bing .mat-scrim{display:none}
 .bg-bing .mat{backdrop-filter:blur(16px)}
+/* Bing photos have no pre-rendered materials, so focus plates blur the live photo; each material sets its own depth. */
+.bg-bing .ph-field{display:none}
+.bg-bing.m-soft .mat,.bg-bing.m-soft .ph-plate{backdrop-filter:blur(28px) saturate(1.1)}
+.bg-bing.m-frost .mat,.bg-bing.m-frost .ph-plate{backdrop-filter:blur(18px) saturate(1.25) brightness(1.08)}
+.bg-bing.m-frost .ph-veil{background:rgba(255,250,240,.10)}
+.bg-bing.m-tint .mat,.bg-bing.m-tint .ph-plate{backdrop-filter:blur(3px)}
 .registered-material .mat-scrim,.registered-material .mat-veil{display:none}
 .m-frost .mat-scrim{display:none}
 .m-frost .mat-veil{background:rgba(12,10,8,var(--fv,.12))}

@@ -87,7 +87,7 @@
   }
   function lookOf(c) { return { bg: c.bg, wall: c.wall, layout: c.layout, apps: c.apps, font: c.font, controls: c.controls, focus: c.focus, material: c.material }; }
   function canRotate(bg) { return bg === 'photo' || bg === 'bing'; }
-  function materialApplies(c) { c = c || S.c; return c.bg === 'photo' && (c.layout === 'dock' || c.focus === 'glass'); }
+  function materialApplies(c) { c = c || S.c; return canRotate(c.bg) && (c.layout === 'dock' || c.focus === 'glass'); }
   function derivedTheme() { return S.c.layout === 'list' ? 'list' : 'shore'; }
 
   /* ---------- Helpers ---------- */
@@ -875,7 +875,7 @@
       label: axis === 'font' ? FONTS[value].name : axis === 'mode' ? MODES.filter(function (m) { return m.id === value; })[0].name : value === 'both' ? 'Both' : VALUE_NAMES[value] };
   }
   function detailSections(t) {
-    var flat = S.c.bg !== 'photo', rotate = canRotate(S.c.bg), inactive = !materialApplies();
+    var flat = !canRotate(S.c.bg), rotate = canRotate(S.c.bg), inactive = !materialApplies();
     function options(axis, values, disabled) { return values.map(function (value) { return choice(axis, value, disabled); }); }
     if (t.group === 'background') return [
       { id: 'bg', title: 'Background type', items: options('bg', ['photo', 'bing', 'light', 'dark']) },
@@ -891,7 +891,7 @@
     if (t.group === 'focus') return [
       { id: 'focus', title: 'Focus style', horizontal: true, items: options('focus', ['type', 'glass']) },
       { id: 'material', title: 'Material', horizontal: true, items: options('material', ['soft', 'frost', 'tint'], inactive),
-        reason: inactive ? flat ? 'Materials are available with a Photo background.' : 'Choose Glass focus or the Dock layout to use materials.' : '' }
+        reason: inactive ? flat ? 'Materials are available with a Photo or Random Bing photo background.' : 'Choose Glass focus or the Dock layout to use materials.' : '' }
     ];
     if (t.group === 'rotation') return [{ id: 'mode', title: '', items: options('mode', MODES.map(function (m) { return m.id; }), !rotate),
       reason: !rotate ? 'Choose Photo or Random Bing photo to use rotation.' : 'Timed changes run only while Home is visible.' }];
