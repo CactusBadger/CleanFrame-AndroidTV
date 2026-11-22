@@ -1,0 +1,57 @@
+{
+  "version": "2.0.0",
+  "inputs": [
+    {
+      "id": "qs01Endpoint",
+      "type": "promptString",
+      "description": "QS01 ADB endpoint (IP:port)",
+      "default": "192.168.1.174:5555"
+    }
+  ],
+  "tasks": [
+    {
+      "label": "CleanFrame: Build debug APK",
+      "type": "process",
+      "command": "./gradlew",
+      "args": [
+        "-q",
+        "testDebugUnitTest",
+        "assembleDebug"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}",
+        "env": {
+          "ANDROID_HOME": "${env:HOME}/Android/Sdk"
+        }
+      },
+      "problemMatcher": [],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    },
+    {
+      "label": "CleanFrame: Build and install on QS01",
+      "type": "process",
+      "command": "bash",
+      "args": [
+        "-e",
+        "-u",
+        "-o",
+        "pipefail",
+        "-c",
+        "adb connect \"$QS01\"\nadb -s \"$QS01\" install -r app/build/outputs/apk/debug/app-debug.apk\nadb -s \"$QS01\" shell am start -n com.example.tv/.MainActivity"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}",
+        "env": {
+          "QS01": "${input:qs01Endpoint}"
+        }
+      },
+      "dependsOn": "CleanFrame: Build debug APK",
+      "dependsOrder": "sequence",
+      "problemMatcher": [],
+      "group": "build"
+    }
+  ]
+}
