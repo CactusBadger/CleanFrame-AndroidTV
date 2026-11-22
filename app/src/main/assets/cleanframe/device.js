@@ -11,6 +11,7 @@
     primevideo: 'com.amazon.amazonvideo.livingroom',
     plex: 'com.plexapp.android',
     googleplay: 'com.android.vending',
+    googleplaygames: 'com.google.android.play.games',
     airplayvideo: 'com.ecloud.eairplay',
     bluetooth: 'com.inspur.BlueToothController'
   };
@@ -24,6 +25,7 @@
     'com.amazon.amazonvideo.livingroom': 'primevideo',
     'com.plexapp.android': 'plex',
     'com.android.vending': 'googleplay',
+    'com.google.android.play.games': 'googleplaygames',
     'com.ecloud.eairplay': 'airplayvideo',
     'com.inspur.BlueToothController': 'bluetooth'
   };

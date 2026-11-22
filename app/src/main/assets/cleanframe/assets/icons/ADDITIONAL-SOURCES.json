@@ -16,5 +16,11 @@
     "source": "https://github.com/simple-icons/simple-icons/blob/develop/icons/tubi.svg",
     "licence": "CC0-1.0",
     "note": "Shape unchanged; white fill for launcher."
+  },
+  {
+    "icon": "googleplaygames",
+    "source": "Provided locally by the repository user",
+    "licence": "Not specified",
+    "note": "Integrated as supplied; no external source or licence is claimed."
   }
 ]

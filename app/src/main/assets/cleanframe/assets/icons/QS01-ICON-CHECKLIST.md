@@ -12,9 +12,12 @@ The list covers launchable packages discovered on the QS01 in the Leanback and s
 - [x] iMirror / eAirPlay (`com.ecloud.eairplay`) — `airplayvideo.svg` (AirPlay video function mark)
 - [x] Bluetooth Controller (`com.inspur.BlueToothController`) — `bluetooth.svg` (Bluetooth function mark)
 
+## Other suitable icons
+
+- [x] Google Play Games (`com.google.android.play.games`) — `googleplaygames.svg` (locally supplied; source/licence unspecified)
+
 ## No suitable Simple Icon found
 
-- [ ] Google Play Games (`com.google.android.play.games`) — no game-specific icon; Google Play is not a suitable substitute.
 - [ ] BenQ Dashboard (`com.benq.dashboard`) — no BenQ icon in the catalog.
 - [ ] Downloader (`com.esaba.downloader`) — no matching app icon.
 - [ ] Cannoli / Scorza (`dev.cannoli.scorza`) — no matching icon.
