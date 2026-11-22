@@ -10,7 +10,16 @@ Use this skill for layout, remote-navigation, settings/state, wallpaper, and Web
 ## Reproduce in a browser
 
 1. Open `app/src/main/assets/cleanframe/index.html` in the integrated browser. The stage is designed around a 1920 × 1080 TV viewport; use that viewport when checking layout and clipping.
-2. Read the current UI and committed settings before interacting. The app exposes a `window.QA` bridge for browser checks:
+2. Use Playwright controls for reproducible UI interactions: set the viewport, query elements with accessible roles or stable selectors, send remote-style key presses, and capture screenshots. For example:
+
+   ```js
+   await page.setViewportSize({ width: 1920, height: 1080 });
+   await page.getByRole('button', { name: 'Settings' }).click();
+   await page.keyboard.press('ArrowDown');
+   ```
+
+   Check for browser console errors and uncaught page errors when reproducing a failure. Prefer visible behavior and accessible locators; inspect computed styles or stage classes when diagnosing contrast, layout, or asynchronous appearance updates.
+3. Read the current UI and committed settings before interacting. The app exposes a `window.QA` bridge for browser checks:
 
    ```js
    window.QA.state()
@@ -18,7 +27,7 @@ Use this skill for layout, remote-navigation, settings/state, wallpaper, and Web
    window.QA.actions()
    ```
 
-3. Use the bridge to exercise the real app state machine:
+4. Use the bridge when deterministic state inspection or navigation is more useful than pointer interaction:
 
    ```js
    window.QA.nav('down', 'enter')
@@ -27,8 +36,10 @@ Use this skill for layout, remote-navigation, settings/state, wallpaper, and Web
    ```
 
    Supported scenes are `home`, `apps`, `settings`, `appearance`, and `editor`. Navigation accepts `up`, `down`, `left`, `right`, `enter`/`ok`, and `back`/`escape`. Check the live implementation in `main.js` if an action or choice is unclear.
-4. `QA.look()` writes normal app preferences. Prefer a disposable browser profile; if using a shared preview, record the starting settings and restore them after the test. Do not use the QA bridge to change a physical TV's configuration.
-5. For wallpaper or other network-backed features, distinguish a rendering/state bug from a failed request or unavailable CORS access. Check the browser console and rendered stage classes/computed styles; verify that the intended fallback remains usable when remote content cannot load.
+5. `QA.look()` writes normal app preferences. Prefer a disposable browser profile; if using a shared preview, record the starting settings and restore them after the test. Do not use the QA bridge to change a physical TV's configuration.
+6. For wallpaper or other network-backed features, distinguish a rendering/state bug from a failed request or unavailable CORS access. Check the browser console and rendered stage classes/computed styles; verify that the intended fallback remains usable when remote content cannot load.
+
+The repository has no Playwright package or test configuration. Use the integrated browser's Playwright capability for interactive debugging; do not add a package, config, or persistent browser test harness unless the task calls for it.
 
 ## Verify Android-specific behavior
 
