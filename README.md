@@ -17,19 +17,15 @@
 
 **CleanFrame Android TV** is an open-source, ultra-minimalist home launcher designed specifically for Android TV and Google TV devices (such as Xiaomi Mi TV, Chromecast with Google TV, Sony Bravia, Nvidia Shield, and TCL TVs).
 
-Ported from [Nathan Clark's CleanFrame](https://github.com/nthnclrk/CleanFrame) (originally built for Samsung The Frame on Tizen), this project brings the same serene aesthetic, high-res photographic art gallery, and zero-distraction interface to the Android TV ecosystem.
+Ported from [Nathan Clark's CleanFrame](https://github.com/nthnclrk/CleanFrame) (originally built for Samsung The Frame on Tizen), this project brings the same serene aesthetic, Bing-powered art gallery, and zero-distraction interface to the Android TV ecosystem.
 
 ---
 
 ## Screen Preview
 
-| Home Screen (Wi-Fi Icon & Dock) | Fullscreen Art Mode Screensaver (Zero UI) |
+| Network Settings | Direct Google Play Store Integration |
 | :---: | :---: |
-| ![CleanFrame Home Dock](docs/screenshots/home-wifi-icon.png) | ![CleanFrame Art Mode](docs/screenshots/art-mode-misty.png) |
-
-| Artwork Rotation (Quiet Cove) | Direct Google Play Store Integration |
-| :---: | :---: |
-| ![CleanFrame Art Gallery](docs/screenshots/art-mode-cove.png) | ![Google Play Store](docs/screenshots/playstore-disney.png) |
+| ![Android TV Network Settings](docs/screenshots/network-settings.png) | ![Google Play Store](docs/screenshots/playstore-disney.png) |
 
 ---
 
@@ -40,16 +36,16 @@ Ported from [Nathan Clark's CleanFrame](https://github.com/nthnclrk/CleanFrame) 
   - Clicking it immediately launches the native Android TV *Network & Internet* list for fast Wi-Fi connection switching and configuration.
   - Automatically detects active network type (Wi-Fi vs Ethernet).
 
-- **Backgrounds and Photo Rotation**:
-  - Choose a bundled photo or **Random Bing photo** in **Settings → Background → Background type**. The Bing catalogue uses the [Bing UK weekly feed](https://raw.githubusercontent.com/zigou23/Bing-Daily-Wallpaper/refs/heads/main/bing/weekly/bing_en-GB.json) and is refreshed when its cached copy is more than a day old.
+- **Bing Backgrounds and Rotation**:
+  - Choose a **Random Bing photo**, **Light**, or **Dark** background in **Settings → Background → Background type**. The Bing catalogue uses the [Bing UK weekly feed](https://raw.githubusercontent.com/zigou23/Bing-Daily-Wallpaper/refs/heads/main/bing/weekly/bing_en-GB.json) and is refreshed when its cached copy is more than a day old.
   - Rotation can keep the current photo, choose one when CleanFrame starts, or change it every 5, 15, or 60 minutes while Home is visible. Opening or restarting Home preserves the current Bing photo. When a feed update brings a different newest photo, it is shown first; rotation then resumes random selection.
-  - Bing photos load separately from the catalogue. If a photo cannot be loaded, CleanFrame keeps the current photo or uses its bundled fallback.
+  - Bing photos load separately from the catalogue. If a photo cannot be loaded, CleanFrame keeps the last loaded image; first launch uses a solid-color fallback.
   - **Focus → Material** (Soft, Frost or Clear tint) works with Bing backgrounds by blurring the live photo. The Home dock also blurs the current Bing background.
 
 - **Full-Screen Art Mode Screensaver**:
   - Hides the dock, status text, clock, and overlays for a full-screen artwork.
-  - With a Bing background, Art Mode shuffles Bing photos every 45 seconds and shows photo credits.
-  - Press **Left** or **Right** to browse artworks. Press any other key to return Home; the displayed photo becomes the background. The existing Rotation setting still applies.
+  - Art Mode always shuffles Bing photos every 45 seconds and shows photo credits, regardless of the Home background.
+  - Press **Left** or **Right** to browse artworks. Any other key returns Home; the selected photo is saved as the next Bing Home image without changing a Light or Dark Home background.
   - Starts automatically after 3 minutes of inactivity on Home.
 
 - **Navigation Sound**:
@@ -163,7 +159,7 @@ CleanFrame-AndroidTV/
 │   │   │   ├── main.js                  # Scaling, state machine & Art Mode
 │   │   │   ├── device.js                # Android TV hardware bridge
 │   │   │   ├── style.css                # Visual design, transitions & typography
-│   │   │   └── assets/                  # Wallpapers, fonts & icons
+│   │   │   └── assets/                  # Fonts & icons
 │   │   └── res/                         # Android icons, sounds & layouts
 ├── gradle/                              # Gradle wrapper and version catalogs
 ├── build.gradle.kts                     # Root build configuration
@@ -175,7 +171,6 @@ CleanFrame-AndroidTV/
 ## Credits & Acknowledgments
 
 - **[Nathan Clark](https://github.com/nthnclrk)**: Original creator of [CleanFrame for Samsung The Frame](https://github.com/nthnclrk/CleanFrame).
-- **Photography Credits**: Unsplash photographers referenced in `app/src/main/assets/cleanframe/assets/PHOTO-CREDIT.md`.
 - **Fonts**: Manrope, Geist, and Newsreader (Open Font License).
 
 ---

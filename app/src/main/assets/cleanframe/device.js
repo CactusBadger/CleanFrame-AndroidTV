@@ -56,8 +56,6 @@
     if (!done) done = function () {};
     if (typeof window.enterArtMode === 'function') {
       try { window.enterArtMode(); } catch (e) {}
-    } else if (typeof openWallpaper === 'function') {
-      try { openWallpaper(); } catch (e) {}
     } else if (hasBridge() && window.AndroidBridge.openScreensaver) {
       window.AndroidBridge.openScreensaver();
     }
