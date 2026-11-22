@@ -1018,6 +1018,122 @@
   /* ---------- Art Mode (Full Screen Screensaver) ---------- */
   var artSlideTimer = null, artCaptionTimer = null, artIndex = 0, idleTimer = null;
   var bingHome = null, bingHomeToken = 0, bingHomeKey = 'cleanframe.bing-home.v1';
+  var bingAppearance = null, bingAppearanceRequest = 0, bingAppearanceRequestedUrl = null;
+  var bingAppearanceCache = Object.create(null);
+  var BING_DEFAULT_APPEARANCE = {
+    tone: 'dark', ut: { tr: 'mist', br: 'mist' }, frostVeil: .12,
+    listColumn: 0, dockQuiet: false, clockMist: false
+  };
+
+  function luminance(r, g, b) {
+    function linear(value) {
+      value /= 255;
+      return value <= .04045 ? value / 12.92 : Math.pow((value + .055) / 1.055, 2.4);
+    }
+    return .2126 * linear(r) + .7152 * linear(g) + .0722 * linear(b);
+  }
+
+  function sampleBingRegion(pixels, width, height, region) {
+    var x0 = Math.floor(region[0] * width), y0 = Math.floor(region[1] * height);
+    var x1 = Math.min(width, Math.ceil(region[2] * width)), y1 = Math.min(height, Math.ceil(region[3] * height));
+    var values = [], sum = 0, x, y, offset, value;
+    for (y = y0; y < y1; y += 2) {
+      for (x = x0; x < x1; x += 2) {
+        offset = (y * width + x) * 4;
+        value = luminance(pixels[offset], pixels[offset + 1], pixels[offset + 2]);
+        values.push(value); sum += value;
+      }
+    }
+    values.sort(function (a, b) { return a - b; });
+    return {
+      mean: sum / values.length,
+      low: values[Math.floor((values.length - 1) * .1)],
+      high: values[Math.floor((values.length - 1) * .9)]
+    };
+  }
+
+  function bingInkRegion(stats) {
+    var pol, rung, ink, halo, shadow, rest, peer;
+    if (stats.high < .19) {
+      pol = 'light'; rung = 'light'; ink = '#f6f1e7';
+      halo = 'rgba(14,10,6,.38)'; shadow = '0 1px 2px rgba(14,10,6,.4),0 2px 8px rgba(14,10,6,.24)';
+      rest = .92; peer = .78;
+    } else if (stats.mean < .34 || stats.low < .12 && stats.high > .62) {
+      pol = 'mist'; rung = 'mist-high'; ink = '#fffbf4';
+      halo = 'rgba(14,10,6,.48)'; shadow = '0 1px 2px rgba(14,10,6,.4),0 2px 8px rgba(14,10,6,.24)';
+      rest = .9; peer = .76;
+    } else {
+      pol = 'dark'; rung = stats.low < .35 ? 'dark-halo' : 'dark'; ink = '#211a13';
+      halo = 'rgba(248,252,255,.28)'; shadow = '0 1px 2px rgba(248,252,255,.28)';
+      rest = .9; peer = .76;
+    }
+    return { pol: pol, rung: rung, ink: ink, clockInk: ink, restInk: ink, peerInk: ink,
+      restAlpha: rest, peerAlpha: peer, halo: halo, shadow: shadow };
+  }
+
+  function makeBingAppearance(image) {
+    var canvas = document.createElement('canvas'), width = 160, height = 90, ctx, pixels;
+    canvas.width = width; canvas.height = height;
+    ctx = canvas.getContext('2d', { willReadFrequently: true });
+    ctx.drawImage(image, 0, 0, width, height);
+    pixels = ctx.getImageData(0, 0, width, height).data;
+    var all = sampleBingRegion(pixels, width, height, [0, 0, 1, 1]);
+    var tlStats = sampleBingRegion(pixels, width, height, [.04, .035, .26, .20]);
+    var trStats = sampleBingRegion(pixels, width, height, [.70, .035, .97, .20]);
+    var brStats = sampleBingRegion(pixels, width, height, [.69, .73, .98, .96]);
+    var dockStats = sampleBingRegion(pixels, width, height, [.18, .63, .82, .85]);
+    var listStats = sampleBingRegion(pixels, width, height, [.04, .18, .43, .90]);
+    var tl = bingInkRegion(tlStats), tr = bingInkRegion(trStats), br = bingInkRegion(brStats);
+    var appInk = dockStats.mean < .29 ? '#f6f1e7' : '#211a13';
+    var frostVeil = dockStats.mean > .72 ? .44 : dockStats.mean > .56 ? .30 : dockStats.mean > .39 ? .20 : .12;
+    return {
+      locked: false, tone: all.mean > .50 ? 'light' : 'dark',
+      light: appInk, tl: tl, tr: tr, br: br,
+      ut: { tr: tr.pol, br: br.pol }, frostVeil: frostVeil,
+      listColumn: listStats.mean > .52 ? 3 : listStats.mean > .32 ? 2 : 0,
+      dockQuiet: dockStats.high - dockStats.low > .48,
+      clockMist: tl.pol === 'mist'
+    };
+  }
+
+  function analyzeBingAppearance(url) {
+    var request, image;
+    if (bingAppearanceRequestedUrl && bingAppearanceRequestedUrl !== url) {
+      bingAppearanceRequest++;
+      bingAppearanceRequestedUrl = null;
+    }
+    bingAppearance = bingAppearanceCache[url] || null;
+    render();
+    if (bingAppearance || bingAppearanceRequestedUrl === url) return;
+    bingAppearanceRequestedUrl = url;
+    request = ++bingAppearanceRequest;
+    image = new Image();
+    image.crossOrigin = 'anonymous';
+    image.referrerPolicy = 'no-referrer';
+    image.onload = function () {
+      var appearance;
+      if (request !== bingAppearanceRequest || !bingHome || bingHome.url !== url) return;
+      bingAppearanceRequestedUrl = null;
+      try {
+        appearance = makeBingAppearance(image);
+        bingAppearanceCache[url] = appearance;
+        bingAppearance = appearance;
+        render();
+      } catch (error) {
+        console.warn('Could not analyze Bing wallpaper appearance', error);
+        bingAppearance = null;
+        render();
+      }
+    };
+    image.onerror = function () {
+      if (request !== bingAppearanceRequest || !bingHome || bingHome.url !== url) return;
+      bingAppearanceRequestedUrl = null;
+      console.warn('Could not load Bing wallpaper for appearance analysis');
+      bingAppearance = null;
+      render();
+    };
+    image.src = url;
+  }
 
   function loadBingImage(entry, done) {
     var image = document.createElement('img');
@@ -1033,6 +1149,7 @@
     bingHome = entry;
     try { localStorage.setItem(bingHomeKey, JSON.stringify({ url: entry.url, copyright: entry.copyright || '' })); }
     catch (error) { console.warn('Could not save Bing Home wallpaper preference', error); }
+    analyzeBingAppearance(entry.url);
   }
 
   function chooseBingHome(keepSaved, timedMode) {
@@ -1257,13 +1374,14 @@
   var sheetEl = $('sheet'), sheetView = $('sheetView');
   var IMG = { photo: $('photo'), mat: $('matImg'), bg: $('sheetBg'), field: $('phFieldImg'), fieldAlt: $('phFieldImgAlt'), utility: $('utFieldImg'), utilityAlt: $('utFieldImgAlt') };
   var sheetKey = '', slotEls = {}, dockEdgeFrame = 0, dockEdgeUntil = 0, dockAnchorCenter = 960;
-  var appliedPalette = null, appliedPhoto = null, appliedFont = null, appliedFontMetrics = null;
+  var appliedPalette = null, appliedBackground = null, appliedFont = null, appliedFontMetrics = null;
 
   /* Curated locked palettes keep the existing rendering path exactly. */
   function applyAdaptiveInk(palette) {
-    var active = S.c.bg === 'photo' && palette && !palette.locked && palette.light && palette.tl && palette.tr && palette.br;
-    if (appliedPalette === palette && appliedPhoto === (S.c.bg === 'photo')) return !!active;
-    appliedPalette = palette; appliedPhoto = S.c.bg === 'photo';
+    var supportedBackground = S.c.bg === 'photo' || S.c.bg === 'bing';
+    var active = supportedBackground && palette && !palette.locked && palette.light && palette.tl && palette.tr && palette.br;
+    if (appliedPalette === palette && appliedBackground === S.c.bg) return !!active;
+    appliedPalette = palette; appliedBackground = S.c.bg;
     ['tl', 'tr', 'br'].forEach(function (zone) {
       var r = active ? palette[zone] : null;
       var values = r ? { ink: r.ink, 'clock-ink': r.clockInk || r.ink, 'rest-ink': r.restInk, 'peer-ink': r.peerInk, rest: r.restAlpha, peer: r.peerAlpha, under: r.halo, shadow: r.shadow } : {};
@@ -1285,12 +1403,14 @@
     }).join('');
   }
   function render() {
-    var t = top(), sheet = !!V[t.id].sheet, shown = wall(S.shown ? S.shown.wall : S.c.wall), palette = ADAPTIVE_INK[shown.id];
-    var adaptive = applyAdaptiveInk(palette), tr = adaptive && palette.tr ? palette.tr.pol : shown.ut.tr, br = adaptive && palette.br ? palette.br.pol : shown.ut.br;
-    stage.className = 'stage bg-' + S.c.bg + ' l-' + S.c.layout + ' v-' + S.variant + ' m-' + (materialApplies() ? S.c.material : 'none') + ' f-' + S.c.focus + ' a-' + S.c.apps + ' u-' + S.c.controls + ' g-' + S.geom + ' tone-' + shown.tone + ' tr-' + tr + ' br-' + br + wallClasses(shown) + inkRungClasses(palette, adaptive) + ' at-' + t.id + ' font-' + homeFont() + (homeFont() !== 'manrope' ? ' font-custom' : '') + (S.fontSwitch ? ' is-font-switch' : '') + (adaptive ? ' has-adaptive-ink adaptive-tl-' + palette.tl.pol : '') + (!adaptive && shown.clockInk ? ' has-clock-ink' : '') + (!adaptive && shown.dockClockInk ? ' has-dock-clock-ink' : '') + (registeredMaterial(shown.id) ? ' registered-material' : '') + (sheet ? ' is-sheet' : '') + (S.reflow ? ' is-reflow' : '');
-    if (!adaptive && shown.clockInk) stage.style.setProperty('--clock-ink', shown.clockInk);
+    var t = top(), sheet = !!V[t.id].sheet, shown = wall(S.shown ? S.shown.wall : S.c.wall), bing = S.c.bg === 'bing';
+    var visual = bing ? (bingAppearance || BING_DEFAULT_APPEARANCE) : shown;
+    var palette = bing ? bingAppearance : ADAPTIVE_INK[shown.id];
+    var adaptive = applyAdaptiveInk(palette), tr = adaptive && palette.tr ? palette.tr.pol : visual.ut.tr, br = adaptive && palette.br ? palette.br.pol : visual.ut.br;
+    stage.className = 'stage bg-' + S.c.bg + ' l-' + S.c.layout + ' v-' + S.variant + ' m-' + (materialApplies() ? S.c.material : 'none') + ' f-' + S.c.focus + ' a-' + S.c.apps + ' u-' + S.c.controls + ' g-' + S.geom + ' tone-' + visual.tone + ' tr-' + tr + ' br-' + br + wallClasses(visual) + inkRungClasses(palette, adaptive) + ' at-' + t.id + ' font-' + homeFont() + (homeFont() !== 'manrope' ? ' font-custom' : '') + (S.fontSwitch ? ' is-font-switch' : '') + (adaptive ? ' has-adaptive-ink adaptive-tl-' + palette.tl.pol : '') + (!adaptive && visual.clockInk ? ' has-clock-ink' : '') + (!adaptive && visual.dockClockInk ? ' has-dock-clock-ink' : '') + (!bing && registeredMaterial(shown.id) ? ' registered-material' : '') + (sheet ? ' is-sheet' : '') + (S.reflow ? ' is-reflow' : '');
+    if (!adaptive && visual.clockInk) stage.style.setProperty('--clock-ink', visual.clockInk);
     else stage.style.removeProperty('--clock-ink');
-    if (!adaptive && shown.dockClockInk) stage.style.setProperty('--dock-clock-ink', shown.dockClockInk);
+    if (!adaptive && visual.dockClockInk) stage.style.setProperty('--dock-clock-ink', visual.dockClockInk);
     else stage.style.removeProperty('--dock-clock-ink');
     applyHomeFont();
     if (!sheet) renderHome(t);
