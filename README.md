@@ -37,7 +37,7 @@ Ported from [Nathan Clark's CleanFrame](https://github.com/nthnclrk/CleanFrame) 
   - Automatically detects active network type (Wi-Fi vs Ethernet).
 
 - **Bing Backgrounds and Rotation**:
-  - Choose a **Random Bing photo**, **Light**, or **Dark** background in **Settings → Background → Background type**. The Bing catalogue uses the [Bing UK weekly feed](https://raw.githubusercontent.com/zigou23/Bing-Daily-Wallpaper/refs/heads/main/bing/weekly/bing_en-GB.json) and is refreshed when its cached copy is more than a day old.
+  - Choose **Bing photos**, **Light**, or **Dark** in **Settings → Background → Background type**. The Bing catalogue uses the [Bing UK weekly feed](https://raw.githubusercontent.com/zigou23/Bing-Daily-Wallpaper/refs/heads/main/bing/weekly/bing_en-GB.json) and is refreshed when its cached copy is more than a day old.
   - Rotation can keep the current photo, choose one when CleanFrame starts, or change it every 5, 15, or 60 minutes while Home is visible. Opening or restarting Home preserves the current Bing photo. When a feed update brings a different newest photo, it is shown first; rotation then resumes random selection.
   - Bing photos load separately from the catalogue. If a photo cannot be loaded, CleanFrame keeps the last loaded image; first launch uses a solid-color fallback.
   - **Focus → Material** (Soft, Frost or Clear tint) works with Bing backgrounds by blurring the live photo. The Home dock also blurs the current Bing background.

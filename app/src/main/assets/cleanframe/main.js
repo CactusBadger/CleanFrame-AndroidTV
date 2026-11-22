@@ -40,7 +40,7 @@
   var LOOK_KEYS = ['bg', 'layout', 'apps', 'font', 'controls', 'focus', 'material'];
   var LOOK_VALUES = { bg: ['dark', 'light', 'bing'], layout: ['list', 'dock'], apps: ['icons', 'both', 'text'], font: Object.keys(FONTS).filter(function (id) { return id === 'manrope' || PRIVATE_FONTS.indexOf(id) >= 0; }), controls: ['icons', 'both', 'text'], focus: ['type', 'glass'], material: ['soft', 'frost', 'tint'] };
   var LOOK_NAMES = { bg: 'Background', layout: 'Layout', apps: 'Apps', font: 'Font', controls: 'Home controls', focus: 'Focus', material: 'Material' };
-  var VALUE_NAMES = { dark: 'Dark', light: 'Light', bing: 'Random Bing photo', list: 'List', dock: 'Dock', type: 'Type', glass: 'Glass', soft: 'Soft', frost: 'Frost', tint: 'Clear tint', s0: 'Off', s2: '2%', s5: '5%', s10: '10%', s25: '25%', s50: '50%', icons: 'Icons', both: 'Icons and text', text: 'Text' };
+  var VALUE_NAMES = { dark: 'Dark', light: 'Light', bing: 'Bing photos', list: 'List', dock: 'Dock', type: 'Type', glass: 'Glass', soft: 'Soft', frost: 'Frost', tint: 'Clear tint', s0: 'Off', s2: '2%', s5: '5%', s10: '10%', s25: '25%', s50: '50%', icons: 'Icons', both: 'Icons and text', text: 'Text' };
   var UTIL = { wifi: ['Wi-Fi', 'wifi'], art: ['Art Mode', 'art'], apps: ['All apps', 'apps'], arrange: ['Arrange', 'arrange'], settings: ['Settings', 'settings'] };
   var MSG = {
     leave: { title: 'Leave Home?', line: 'Return to the Home screen?', note: '', actions: [['stay', 'Stay'], ['home', 'Home screen']] }
@@ -786,7 +786,7 @@
     function options(axis, values, disabled) { return values.map(function (value) { return choice(axis, value, disabled); }); }
     if (t.group === 'background') return [
       { id: 'bg', title: 'Background type', items: options('bg', ['bing', 'light', 'dark']) },
-      { id: 'rotation', title: 'Rotation', items: [{ action: 'background.rotation', label: mode().name, disabled: !rotate }], reason: !rotate ? 'Choose Random Bing photo to use rotation.' : '' }
+      { id: 'rotation', title: 'Rotation', items: [{ action: 'background.rotation', label: mode().name, disabled: !rotate }], reason: !rotate ? 'Choose Bing photos to use rotation.' : '' }
     ];
     if (t.group === 'layout') return [
       { id: 'layout', title: 'Layout', horizontal: true, items: options('layout', ['list', 'dock']) },
@@ -797,10 +797,10 @@
     if (t.group === 'focus') return [
       { id: 'focus', title: 'Focus style', horizontal: true, items: options('focus', ['type', 'glass']) },
       { id: 'material', title: 'Material', horizontal: true, items: options('material', ['soft', 'frost', 'tint'], inactive),
-        reason: inactive ? flat ? 'Materials are available with a Random Bing photo background.' : 'Choose Glass focus or the Dock layout to use materials.' : '' }
+        reason: inactive ? flat ? 'Materials are available with Bing photos.' : 'Choose Glass focus or the Dock layout to use materials.' : '' }
     ];
     if (t.group === 'rotation') return [{ id: 'mode', title: '', items: options('mode', MODES.map(function (m) { return m.id; }), !rotate),
-      reason: !rotate ? 'Choose Random Bing photo to use rotation.' : 'Timed changes run only while Home is visible.' }];
+      reason: !rotate ? 'Choose Bing photos to use rotation.' : 'Timed changes run only while Home is visible.' }];
     if (t.group === 'sound') return [{ id: 'sound', title: 'Navigation sound', items: options('sound', SOUND_LEVELS.map(function (level) { return 's' + level; })),
       reason: 'Percent of the TV media volume. Choosing a level plays the sound once.' }];
     if (t.group === 'device') return [{ id: 'device', title: '', items: [
